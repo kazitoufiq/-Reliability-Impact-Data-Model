@@ -1,1 +1,1 @@
-# -Reliability-Impact-Data-Model
+# Reliability-Impact-Data-Model

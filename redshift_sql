@@ -1,0 +1,723 @@
+/* Create each table to hold source data */
+DROP TABLE IF EXISTS RIM.FMP;
+CREATE TABLE RIM.FMP (
+"Date"	date,
+TPMIS_No	int,
+Car_No	int,
+FMP_No	int,
+Driver_Report	varchar(20000),
+Cause_Of_Incident	varchar(20000),
+PWM int,
+Full_Cancellations	int,
+Short_Cancellations	int,
+Trains_Delayed	int,
+Status	varchar,
+Incidentcode	varchar,
+System_Code	varchar,
+Component_Code	varchar,
+Status_Name	varchar,
+Sort_No	varchar,
+Car_Type_Name	varchar,
+Time	timestamp,
+Minutes_Train_Delayed	varchar,
+Hill_Bay	varchar,
+FMPUnitID	int,
+System_Description	varchar,
+IncidentName	varchar,
+TPMIS_NOT_FMP_accept	varchar,
+Fault_Cat	varchar,
+Minutes_Canc	varchar,
+Stored	varchar,
+Expr1	int,
+NFF	varchar,
+Repeat	varchar,
+"Group" varchar);
+
+DROP TABLE IF EXISTS RIM.INF_PWM_Report;
+CREATE TABLE RIM.INF_PWM_Report (
+"Date" date,
+System_Desc	varchar,
+Subsystem_Desc	varchar,
+Incident_No	int,
+Incident_Desc	varchar(20000),
+Signal_Fault_No int,
+Train_Line	varchar,
+Station	varchar,
+Location	varchar,
+Resp_Desc	varchar,
+Cause_Code	int,
+Total_PWM_Actual int);
+
+DROP TABLE IF EXISTS RIM.Performance_Data_Report;
+CREATE TABLE RIM.Performance_Data_Report (
+"Date" date,
+TDN varchar,
+Line	varchar,
+Arr_Mins_Late	int,
+Arr_Mins_Early	int,
+Dep_Mins_Late int,
+Dep_Mins_Early	int,
+On_Time int,
+AAmex	varchar,
+pwm	decimal(10,2),
+time_band_code	varchar,
+direction	varchar,
+A_bypass_city_loop	int,
+P_Bypass_City_Loop	int,
+A_bypass_westona_loop	int,
+P_Bypass_Westona_Loop	int,
+PlannedDate	date,
+Planned_TDN	varchar,
+Master_TDN	varchar,
+PLineID	varchar,
+PAmex varchar
+);
+
+DROP TABLE IF EXISTS RIM.PRS_Incidents;
+CREATE TABLE RIM.PRS_Incidents (
+Incident_No	int,
+TDN	varchar,
+Line	varchar,
+Line_Description	varchar,
+Incident_Date	date,
+Location_From	varchar,
+Location_To	varchar,
+Band	varchar,
+Band_Description	varchar,
+Responsibility	varchar,
+Resp_Desc	varchar,
+CancelCause varchar,
+Cancel_Desc varchar,
+Reasons varchar(20000));
+
+DROP TABLE IF EXISTS RIM.Signalling_Data;
+CREATE TABLE RIM.Signalling_Data (
+Date	date,
+Fault_No	int,
+Incident_No	int,
+L1_System	varchar,
+L2_Sub_System	varchar,
+L3_Sub_System	varchar,
+L4_Part_List	varchar,
+Locn_Code	varchar,
+Locn_Desc	varchar,
+Maintenance_Section	varchar,
+Resp_Code	int,
+Resp_Desc	varchar,
+SMT_D	varchar,
+Section_No	int,
+Signalling_Department	varchar,
+Signalling_Depot	varchar,
+Signalling_Group	varchar,
+System_Code	int,
+System_Desc	varchar,
+System_No	int,
+Time_Avail	timestamp,
+Time_OK	timestamp,
+Time_OS	timestamp,
+Time_Rep	timestamp,
+Train_Line	varchar,
+Equip_No	varchar,
+Equip_Desc	varchar,
+Fault_Officer_D	varchar,
+Reported_Fault	varchar(20000),
+SMT	varchar,
+Cause_Code	int,
+Cause_Desc	varchar,
+Action_Taken	varchar(20000),
+Sect_No	int,
+Total_Incident_Cnt	int,
+PWM_Incident_Cnt	int,
+Total_PWM_Actual int);
+
+DROP TABLE IF EXISTS RIM.Recategorised;
+CREATE TABLE RIM.Recategorised (
+Incident_No int,
+TDN varchar,
+Line varchar,
+Line_Desc varchar,
+Incident_Date date,
+Location_From varchar,
+Location_To varchar,
+Time_Band varchar,
+Time_Band_Desc varchar,
+Resp varchar,
+Resp_Desc varchar,
+CancelCause varchar,
+Cancel_Desc varchar,
+Reasons varchar(20000),
+Recat_Resp varchar,
+Recategorised varchar);
+
+DROP TABLE IF EXISTS RIM.Station_Coding;
+CREATE TABLE RIM.Station_Coding (
+Acronym varchar,
+Name varchar);
+
+/* Copy data from files located within s3 */
+COPY RIM.FMP FROM 's3://bonobotree/RIM/Jul16/FMP 20160701 20160731.csv'
+credentials ‘aws_access_key_id=apple;aws_secret_access_key=crumble’
+DELIMITER ','
+CSV
+EMPTYASNULL
+IGNOREHEADER 1
+DATEFORMAT AS 'DD/MM/YYYY'
+TIMEFORMAT AS 'HH:MI'
+MAXERROR 10;
+
+COPY RIM.INF_PWM_Report FROM 's3://bonobotree/RIM/Jul16/INF PWM Report 20160701 20160731.csv'
+credentials ‘aws_access_key_id=apple;aws_secret_access_key=crumble’
+DELIMITER ','
+CSV
+EMPTYASNULL
+IGNOREHEADER 1
+DATEFORMAT AS 'DD/MM/YYYY'
+MAXERROR 0
+ACCEPTINVCHARS;
+
+COPY RIM.Performance_Data_Report FROM 's3://bonobotree/RIM/Jul16/Performance Data Report - Revised 20160701 20160731.csv'
+credentials ‘aws_access_key_id=apple;aws_secret_access_key=crumble’
+DELIMITER ','
+CSV
+EMPTYASNULL
+IGNOREBLANKLINES
+IGNOREHEADER 1
+DATEFORMAT AS 'DD-MON-YY'
+MAXERROR 0;
+
+COPY RIM.PRS_Incidents FROM 's3://bonobotree/RIM/Jul16/Incident Data report 20160701 20160731.csv'
+credentials ‘aws_access_key_id=apple;aws_secret_access_key=crumble’
+DELIMITER ','
+CSV
+EMPTYASNULL
+IGNOREBLANKLINES
+IGNOREHEADER 1
+DATEFORMAT AS 'DD/MM/YYYY'
+MAXERROR 0;
+
+COPY RIM.Signalling_Data FROM 's3://bonobotree/RIM/Jul16/Signalling Data 20160701 20160731.csv'
+credentials ‘aws_access_key_id=apple;aws_secret_access_key=crumble’
+DELIMITER ','
+CSV
+EMPTYASNULL
+IGNOREBLANKLINES
+IGNOREHEADER 1
+DATEFORMAT AS 'DD/MM/YYYY'
+TIMEFORMAT AS 'DD/MM/YYYY HH24:MI'
+MAXERROR 0
+ACCEPTINVCHARS;
+
+COPY RIM.Recategorised FROM 's3://bonobotree/RIM/Jul16/Incident Data recategorised 20160701 20160731.csv'
+credentials ‘aws_access_key_id=apple;aws_secret_access_key=crumble’
+DELIMITER ','
+CSV
+IGNOREHEADER 1
+DATEFORMAT AS 'DD/MM/YYYY'
+ACCEPTINVCHARS
+IGNOREBLANKLINES;
+
+COPY RIM.Station_Coding FROM 's3://bonobotree/RIM/Station Abbreviations.csv'
+credentials ‘aws_access_key_id=apple;aws_secret_access_key=crumble’
+DELIMITER ','
+CSV
+EMPTYASNULL;
+
+/* Data joining */
+
+/* Step 1: remove from INF_PWM_Report
+    1) Create new temp table Left join INF_PWM_Report with Signalling_Data ON Incident_Number
+    2) Where there are matches, REMOVE from INF_PWM_Report */
+
+DROP TABLE IF EXISTS RIM.INF_PWM_Report_Stg1;
+SELECT INF_PWM_Report.Date,INF_PWM_Report.Incident_No,RIM.INF_PWM_Report.System_Desc,RIM.INF_PWM_Report.Subsystem_Desc,INF_PWM_Report.Incident_Desc,INF_PWM_Report.Signal_Fault_No,INF_PWM_Report.Train_Line,INF_PWM_Report.Station,INF_PWM_Report.Location,INF_PWM_Report.Resp_Desc,INF_PWM_Report.Cause_Code,INF_PWM_Report.Total_PWM_Actual
+INTO  RIM.INF_PWM_Report_Stg1
+FROM RIM.INF_PWM_Report
+LEFT JOIN RIM.Signalling_Data ON RIM.INF_PWM_Report.Incident_No = RIM.Signalling_Data.Incident_No
+WHERE RIM.Signalling_Data.Incident_No IS NULL;
+
+/* Step 2: Don't change Signalling_Data because duplicates removed from INF_PWM_Report instead of Signalling_Data */
+
+/* Step 3: Create 3 new tables
+    1) Table 1 will contain just Signal incidents
+    2) Table 2 will contain just Trackworks (RESP = 47) incidents
+    3) Table 3 will contain just Power (RESP = 29,30,31,32) incidents */
+    
+DROP TABLE IF EXISTS RIM.INF_PWM_Report_Stg2_Signal;
+SELECT *
+INTO RIM.INF_PWM_Report_Stg2_Signal
+FROM RIM.Signalling_Data
+WHERE Signalling_Data.Resp_Code NOT SIMILAR TO '(29|30|31|32|47)';
+
+DROP TABLE IF EXISTS RIM.INF_PWM_Report_Stg2_Track;
+SELECT *
+INTO RIM.INF_PWM_Report_Stg2_Track
+FROM RIM.Signalling_Data
+WHERE Signalling_Data.Resp_Code = 47;
+
+DROP TABLE IF EXISTS RIM.INF_PWM_Report_Stg2_Power;
+SELECT *
+INTO RIM.INF_PWM_Report_Stg2_Power
+FROM RIM.Signalling_Data
+WHERE Signalling_Data.Resp_Code SIMILAR TO '(29|30|31|32)';
+
+/* Step 4: Create consolidated table format with new expressions (e.g. Expr1)
+    1) Generic expressions to Signalling_Data
+      1a) Add new columns for Expr1 (default = Asset), Expr2 (default = Infrastructure) and Expr3 (default = Signalling)
+    2) Generic expressions to Track data 
+    3) Generic expressions to Power data */
+    
+DROP TABLE IF EXISTS RIM.Consolidated_Incident_Cause;
+SELECT Date,Incident_No AS Incident_Number,CAST(NULL AS varchar(256)) AS Incident_From,CAST(NULL AS varchar(256)) AS Incident_To,Train_Line AS Line,Locn_Desc AS Location,Equip_No AS Asset_ID,CAST('Asset' AS varchar(256)) AS Expr1,CAST('Infrastructure' AS varchar(256)) AS Expr2,CAST('Signals' AS varchar(256)) AS Expr3,L1_System AS Expr4,L2_Sub_System AS Expr5,L3_Sub_System AS Expr6,L4_Part_List AS Expr7,Reported_Fault,Action_Taken
+INTO RIM.Consolidated_Incident_Cause
+FROM RIM.INF_PWM_Report_Stg2_Signal;
+
+INSERT INTO RIM.Consolidated_Incident_Cause (Date,Incident_Number,Line,Location,Asset_ID,Expr1,Expr2,Expr3,Expr4,Expr5,Expr6,Expr7,Reported_Fault,Action_Taken)
+SELECT Date,Incident_No,Train_Line,Locn_Desc,NULL,'Asset','Infrastructure','Track',L4_Part_List,NULL,NULL,NULL,Reported_Fault,Action_Taken
+FROM RIM.INF_PWM_Report_Stg2_Track;
+
+INSERT INTO RIM.Consolidated_Incident_Cause (Date,Incident_Number,Line,Location,Asset_ID,Expr1,Expr2,Expr3,Expr4,Expr5,Expr6,Expr7,Reported_Fault,Action_Taken)
+SELECT Date,Incident_No,Train_Line,Locn_Desc,NULL,'Asset','Infrastructure','Power Supply','Signal Power',NULL,L4_Part_List,NULL,Reported_Fault,Action_Taken
+FROM RIM.INF_PWM_Report_Stg2_Power;
+
+/* Step 5: add incidents from INF_PWM_Report not detailing in Signalling_Data into the Consolidated_Incident_Cause table
+    1) Generic expressions to INF_PWM_Report_Stg1 */
+
+INSERT INTO RIM.Consolidated_Incident_Cause (Date,Incident_Number,Line,Location,Asset_ID,Expr1,Expr2,Expr3,Expr4,Expr5,Expr6,Expr7,Reported_Fault,Action_Taken)
+SELECT Date,Incident_No,Train_Line,Location,NULL,'Asset','Infrastructure',System_Desc,
+CASE System_Desc
+  WHEN 'Signals' THEN 'Other'
+  ELSE Subsystem_Desc END,
+NULL,NULL,NULL,Incident_Desc,NULL
+FROM RIM.INF_PWM_Report_Stg1;
+
+/* Step 6: add incidents from FMP
+    1) Generic expressions to FMP 
+      Note: if loading old TOPS incident data add '03' to the TPMIS No */
+    
+INSERT INTO RIM.Consolidated_Incident_Cause (Date,Incident_Number,Line,Location,Asset_ID,Expr1,Expr2,Expr3,Expr4,Expr5,Expr6,Expr7,Reported_Fault,Action_Taken)
+SELECT Date,TPMIS_No,NULL,NULL,Car_No,'Asset','Rolling Stock',Car_Type_Name,System_Description,Component_Code,NULL,NULL,Driver_Report,NULL
+FROM RIM.FMP;
+
+/* Step 7: create new table for Incident Data ONLY if data is derived from TOPS. This is not an issue with PRS
+    
+Example code:
+
+SELECT DISTINCT * 
+INTO RIM.TOPS_Incidents_Unique
+FROM RIM.TOPS_Incidents;
+*/
+
+/* Step 8: consolidated PRS_Incidents data with Consolidated_Incident_Cause data 
+     1) create PRS_Incidents_Stg1 table with general expressions
+     2) create PRS_Incidents_Stg2 only from distinct records in Stg1
+     3) create PRS_Incidents_Stg3_NotAsset for all records in the PRS incidents that do not have a corresponding record in Consolidated_Incident_Cause (asset faults)
+     4) join PRS_Incidents_Stg3_NotAsset back in to Consolidated_Incident_Cause table  */
+
+DROP TABLE IF EXISTS RIM.PRS_Incidents_Stg1;
+SELECT Incident_Date AS Date,Incident_No AS Incident_Number,Location_From AS Incident_From,Location_To AS Incident_To,Line_Description AS Line,NULL AS Location,NULL AS Asset_ID,
+  CASE Responsibility
+    WHEN 'PRJ' THEN 'Projects'
+    WHEN 'INF' THEN 'Asset'
+    WHEN 'TRN' THEN 'Asset'
+    ELSE 'Operational'
+    END AS Expr1,
+  CASE Responsibility
+    WHEN 'INF' THEN 'Infrastructure'
+    WHEN 'TRN' THEN 'Rolling Stock'
+    ELSE Responsibility
+    END AS Expr2,
+  CASE Responsibility
+    WHEN 'INF' THEN Responsibility
+    WHEN 'TRN' THEN Responsibility
+    ELSE CancelCause
+    END AS Expr3,
+  CASE Responsibility
+    WHEN 'INF' THEN CancelCause
+    WHEN 'TRN' THEN CancelCause
+    ELSE NULL
+    END AS Expr4,
+        NULL AS Expr5,NULL AS Expr6,NULL AS Expr7,Reasons AS Reported_Fault,NULL AS Action_Taken
+INTO RIM.PRS_Incidents_Stg1
+FROM RIM.PRS_Incidents;
+
+DROP TABLE IF EXISTS RIM.PRS_Incidents_Stg2;
+SELECT DISTINCT *
+INTO RIM.PRS_Incidents_Stg2
+FROM RIM.PRS_Incidents_Stg1;
+
+DROP TABLE IF EXISTS RIM.PRS_Incidents_Stg3_NotAsset;
+SELECT RIM.PRS_Incidents_Stg2.Date,RIM.PRS_Incidents_Stg2.Incident_Number,RIM.PRS_Incidents_Stg2.Incident_From,RIM.PRS_Incidents_Stg2.Incident_To,RIM.PRS_Incidents_Stg2.Line,RIM.PRS_Incidents_Stg2.Location,RIM.PRS_Incidents_Stg2.Asset_ID,RIM.PRS_Incidents_Stg2.Expr1,RIM.PRS_Incidents_Stg2.Expr2,RIM.PRS_Incidents_Stg2.Expr3,RIM.PRS_Incidents_Stg2.Expr4,RIM.PRS_Incidents_Stg2.Expr5,RIM.PRS_Incidents_Stg2.Expr6,RIM.PRS_Incidents_Stg2.Expr7,RIM.PRS_Incidents_Stg2.Reported_Fault,RIM.PRS_Incidents_Stg2.Action_Taken
+INTO RIM.PRS_Incidents_Stg3_NotAsset
+FROM RIM.PRS_Incidents_Stg2
+LEFT OUTER JOIN RIM.Consolidated_Incident_Cause
+ON RIM.PRS_Incidents_Stg2.Incident_Number = RIM.Consolidated_Incident_Cause.Incident_Number
+WHERE RIM.Consolidated_Incident_Cause.Incident_Number IS NULL
+  OR (RIM.Consolidated_Incident_Cause.Incident_Number IS NOT NULL AND RIM.PRS_Incidents_Stg2.Expr1 = 'Operational');
+
+INSERT INTO RIM.Consolidated_Incident_Cause
+SELECT *
+FROM RIM.PRS_Incidents_Stg3_NotAsset;
+
+/* Step 9: Add TDN data back in to Consolidtated_Incident_Cause table
+    1) Left join PRS_Incidents (left) back into Consolidated_Incident_Cause (right) date by incident number */
+
+DROP TABLE IF EXISTS RIM.Consolidated_Incident_Cause_Final;    
+SELECT DISTINCT RIM.Consolidated_Incident_Cause.Date,RIM.PRS_Incidents.TDN,RIM.Consolidated_Incident_Cause.Incident_Number,RIM.Consolidated_Incident_Cause.Incident_From,RIM.Consolidated_Incident_Cause.Incident_To,RIM.Consolidated_Incident_Cause.Line,RIM.Consolidated_Incident_Cause.Location,RIM.Consolidated_Incident_Cause.Asset_ID,RIM.Consolidated_Incident_Cause.Expr1,RIM.Consolidated_Incident_Cause.Expr2,RIM.Consolidated_Incident_Cause.Expr3,RIM.Consolidated_Incident_Cause.Expr4,RIM.Consolidated_Incident_Cause.Expr5,RIM.Consolidated_Incident_Cause.Expr6,RIM.Consolidated_Incident_Cause.Expr7,RIM.Consolidated_Incident_Cause.Reported_Fault,RIM.Consolidated_Incident_Cause.Action_Taken
+INTO RIM.Consolidated_Incident_Cause_Final
+FROM RIM.PRS_Incidents
+LEFT JOIN RIM.Consolidated_Incident_Cause
+  ON RIM.PRS_Incidents.Incident_No = RIM.Consolidated_Incident_Cause.Incident_Number;
+  
+/* Step 10) join back performance data from Performance_Data_Report
+    1) Create new table for Performance_Data_Report that includes a UID column
+    2) Left join Performance_Data_Report_UID (left) to Consolidated_Incident_Cause_Final (right) 
+    3) Add in KPI_Factor column to account for duplicate entires (due to TDNs be assigned multiple incidents) this is done by creating new table Consolidated_Performance_Incident_Final table 
+    4) Update Expr codes from PRS to match existing TOPS codes (e.g. PRO update to PJT - Projects)*/
+
+DROP TABLE IF EXISTS RIM.Performance_Data_Report_UID;    
+CREATE TABLE RIM.Performance_Data_Report_UID
+  (UID int IDENTITY(1,1),
+  ActualDate date,
+  ActualTDN varchar,
+  ActualLine	varchar,
+  Arr_Mins_Late	int,
+  Arr_Mins_Early	int,
+  Dep_Mins_Late int,
+  Dep_Mins_Early	int,
+  On_Time int,
+  AAmex	varchar,
+  pwm	decimal(10,2),
+  time_band_code	varchar,
+  direction	varchar,
+  A_bypass_city_loop	int,
+  P_Bypass_City_Loop	int,
+  A_bypass_westona_loop	int,
+  P_Bypass_Westona_Loop	int,
+  PlannedDate	date,
+  Planned_TDN	varchar,
+  Master_TDN	varchar,
+  PLineID	varchar,
+  PAmex varchar);
+
+INSERT INTO RIM.Performance_Data_Report_UID (ActualDate,ActualTDN,ActualLine,Arr_Mins_Late,Arr_Mins_Early,Dep_Mins_Late,Dep_Mins_Early,On_Time,AAmex,pwm,time_band_code,direction,A_bypass_city_loop,P_Bypass_City_Loop,A_bypass_westona_loop,P_Bypass_Westona_Loop,PlannedDate,Planned_TDN,Master_TDN,PLineID,PAmex)
+SELECT Date,TDN,Line,Arr_Mins_Late,Arr_Mins_Early,Dep_Mins_Late,Dep_Mins_Early,On_Time,AAmex,pwm,time_band_code,direction,A_bypass_city_loop,P_Bypass_City_Loop,A_bypass_westona_loop,P_Bypass_Westona_Loop,PlannedDate,Planned_TDN,Master_TDN,PLineID,PAmex
+FROM RIM.Performance_Data_Report;
+
+DROP TABLE IF EXISTS RIM.Consolidated_Performance_Incident;    
+SELECT RIM.Performance_Data_Report_UID.UID,RIM.Performance_Data_Report_UID.ActualDate,RIM.Performance_Data_Report_UID.ActualTDN,RIM.Consolidated_Incident_Cause_Final.Line,RIM.Performance_Data_Report_UID.Arr_Mins_Late,RIM.Performance_Data_Report_UID.Arr_Mins_Early,
+       RIM.Performance_Data_Report_UID.Dep_Mins_Late,RIM.Performance_Data_Report_UID.Dep_Mins_Early,RIM.Performance_Data_Report_UID.On_Time,RIM.Performance_Data_Report_UID.AAmex,RIM.Performance_Data_Report_UID.pwm,RIM.Performance_Data_Report_UID.time_band_code,
+       RIM.Performance_Data_Report_UID.direction,RIM.Performance_Data_Report_UID.A_bypass_city_loop,RIM.Performance_Data_Report_UID.P_Bypass_City_Loop,RIM.Performance_Data_Report_UID.A_bypass_westona_loop,
+       RIM.Performance_Data_Report_UID.P_Bypass_Westona_Loop,RIM.Performance_Data_Report_UID.PlannedDate,RIM.Performance_Data_Report_UID.Planned_TDN,RIM.Performance_Data_Report_UID.Master_TDN,RIM.Performance_Data_Report_UID.PLineID,
+       RIM.Performance_Data_Report_UID.PAmex,RIM.Consolidated_Incident_Cause_Final.Incident_Number,RIM.Consolidated_Incident_Cause_Final.Incident_From,RIM.Consolidated_Incident_Cause_Final.Incident_To,RIM.Consolidated_Incident_Cause_Final.Location,RIM.Consolidated_Incident_Cause_Final.Asset_ID,
+       RIM.Consolidated_Incident_Cause_Final.Expr1,RIM.Consolidated_Incident_Cause_Final.Expr2,RIM.Consolidated_Incident_Cause_Final.Expr3,RIM.Consolidated_Incident_Cause_Final.Expr4,
+       RIM.Consolidated_Incident_Cause_Final.Expr5,RIM.Consolidated_Incident_Cause_Final.Expr6,RIM.Consolidated_Incident_Cause_Final.Expr7,RIM.Consolidated_Incident_Cause_Final.Reported_Fault,RIM.Consolidated_Incident_Cause_Final.Action_Taken
+INTO RIM.Consolidated_Performance_Incident
+FROM RIM.Performance_Data_Report_UID
+LEFT JOIN RIM.Consolidated_Incident_Cause_Final
+  ON RIM.Performance_Data_Report_UID.ActualDate = RIM.Consolidated_Incident_Cause_Final.Date
+  AND RIM.Performance_Data_Report_UID.ActualTDN = RIM.Consolidated_Incident_Cause_Final.TDN;
+  
+DROP TABLE IF EXISTS RIM.Temp;
+SELECT UID,COUNT(*) AS Duplicate
+INTO RIM.Temp
+FROM RIM.Consolidated_Performance_Incident
+GROUP BY UID;
+
+DROP TABLE IF EXISTS RIM.Temp2;
+SELECT UID,SUM(1/CAST(RIM.Temp.Duplicate AS decimal(3,2))) AS KPI_Factor
+INTO RIM.Temp2
+FROM RIM.Temp
+GROUP BY UID;
+
+DROP TABLE IF EXISTS RIM.Consolidated_Performance_Incident_Final;
+SELECT RIM.Consolidated_Performance_Incident.UID,RIM.Temp2.KPI_Factor,RIM.Consolidated_Performance_Incident.ActualDate,RIM.Consolidated_Performance_Incident.ActualTDN,RIM.Consolidated_Performance_Incident.Line,RIM.Consolidated_Performance_Incident.Arr_Mins_Late,
+       RIM.Consolidated_Performance_Incident.Arr_Mins_Early,RIM.Consolidated_Performance_Incident.Dep_Mins_Late,RIM.Consolidated_Performance_Incident.Dep_Mins_Early,RIM.Consolidated_Performance_Incident.On_Time,RIM.Consolidated_Performance_Incident.AAmex,RIM.Consolidated_Performance_Incident.pwm,
+       RIM.Consolidated_Performance_Incident.time_band_code,RIM.Consolidated_Performance_Incident.direction,RIM.Consolidated_Performance_Incident.A_bypass_city_loop,RIM.Consolidated_Performance_Incident.P_Bypass_City_Loop,
+       RIM.Consolidated_Performance_Incident.A_bypass_westona_loop,RIM.Consolidated_Performance_Incident.P_Bypass_Westona_Loop,RIM.Consolidated_Performance_Incident.PlannedDate,RIM.Consolidated_Performance_Incident.Planned_TDN,
+       RIM.Consolidated_Performance_Incident.Master_TDN,RIM.Consolidated_Performance_Incident.PLineID,RIM.Consolidated_Performance_Incident.PAmex,RIM.Consolidated_Performance_Incident.Incident_Number,RIM.Consolidated_Performance_Incident.Incident_From,RIM.Consolidated_Performance_Incident.Incident_To,RIM.Consolidated_Performance_Incident.Location,
+       RIM.Consolidated_Performance_Incident.Asset_ID,RIM.Consolidated_Performance_Incident.Expr1,RIM.Consolidated_Performance_Incident.Expr2,RIM.Consolidated_Performance_Incident.Expr3,RIM.Consolidated_Performance_Incident.Expr4,
+       RIM.Consolidated_Performance_Incident.Expr5,RIM.Consolidated_Performance_Incident.Expr6,RIM.Consolidated_Performance_Incident.Expr7,RIM.Consolidated_Performance_Incident.Reported_Fault,RIM.Consolidated_Performance_Incident.Action_Taken
+INTO RIM.Consolidated_Performance_Incident_Final
+FROM RIM.Consolidated_Performance_Incident
+LEFT JOIN RIM.Temp2
+  ON RIM.Consolidated_Performance_Incident.UID = RIM.Temp2.UID;
+  
+UPDATE RIM.Consolidated_Performance_Incident_Final
+  SET Expr2 =
+    CASE
+      WHEN Expr2 = 'EXT' THEN 'EXT - External Factors'
+      WHEN Expr2 = 'MET' THEN 'MET - Metro Trains'
+      WHEN Expr2 = 'OPS' THEN 'OPS - Operations'
+      WHEN Expr2 = 'OTH' THEN 'OTH - Others'
+      WHEN Expr2 = 'PNL' THEN 'PNL - Pacific National Limited'
+      WHEN Expr2 = 'PRJ' THEN 'PJT - Projects'
+      WHEN Expr2 = 'PSI' THEN 'PSI - Passenger Impact'
+      WHEN Expr2 = 'QBE' THEN 'QBE - Qube Logistics'
+      WHEN Expr2 = 'VAN' THEN 'VAN - Vandals'
+      WHEN Expr2 = 'VLP' THEN 'VLP - V/Line Passenger'
+      ELSE Expr2
+      END;
+UPDATE RIM.Consolidated_Performance_Incident_Final
+  SET Expr3 =
+    CASE
+      WHEN Expr3 = 'AO' THEN 'AO - Stations'
+      WHEN Expr3 = 'CRP' THEN 'CRP - Craigieburn Rail Project'
+      WHEN Expr3 = 'DAO' THEN 'DAO - Drivers Allocation Officer'
+      WHEN Expr3 = 'DER' THEN 'DER - Derailment'
+      WHEN Expr3 = 'DRC' THEN 'DRC - Dandenong Rail Corridor'
+      WHEN Expr3 = 'DTRS' THEN 'DTRS - Digital Train Radio System'
+      WHEN Expr3 = 'FGT' THEN 'FGT - Freight Train'
+      WHEN Expr3 = 'FT' THEN 'FT - Faulty Train'
+      WHEN Expr3 = 'GRF' THEN 'GRF - Graffiti'
+      WHEN Expr3 = 'ILL' THEN 'ILL - ILL Passenger'
+      WHEN (Expr3 = 'INF' AND Expr2 != 'Infrastructure') THEN 'INF - Infrastructure'
+      WHEN (Expr3 = 'INF' AND Expr2 = 'Infrastructure') THEN 'Infrastructure Unallocated'
+      WHEN Expr3 = 'LX' THEN 'LXI - Level crossing Incident'
+      WHEN Expr3 = 'MET' THEN 'MET - Metro Trains'
+      WHEN Expr3 = 'MTL' THEN 'MTL - Metrol'
+      WHEN Expr3 = 'OTH' THEN 'OTH - Others'
+      WHEN Expr3 = 'PAS' THEN 'PAS - Passenger Train'
+      WHEN Expr3 = 'PJT' THEN 'PJT - Projects'
+      WHEN Expr3 = 'PLO' THEN 'PLO - Police Operations'
+      WHEN Expr3 = 'RRL' THEN 'RRL - Regional Rail Link Project'
+      WHEN Expr3 = 'SIG' THEN 'SIG - Signaller'
+      WHEN Expr3 = 'TCF' THEN 'TCF - Track Circuit Failure'
+      WHEN Expr3 = 'TPS' THEN 'TPS - Trespasser Struck'
+      WHEN (Expr3 = 'TRN' AND Expr2 != 'Rolling Stock') THEN 'TRN - Fleet Maintenance' 
+      WHEN (Expr3 = 'TRN' AND Expr2 = 'Rolling Stock') THEN 'Rolling Stock Unallocated'
+      WHEN Expr3 = 'TRS' THEN 'TRS - Trespasser'
+      WHEN Expr3 = 'TS' THEN 'TS - Train Services'
+      WHEN Expr3 = 'TTC' THEN 'TTC - Timetable Constraints'
+      WHEN Expr3 = 'UPG' THEN 'UPG - Unruly Passenger'
+      WHEN Expr3 = 'VAN' THEN 'VAN - Vandalism'
+      WHEN Expr3 = 'WHC' THEN 'WHC - Wheelchairs'
+      WHEN Expr3 = 'WHR' THEN 'WHR - Weather'
+      WHEN Expr3 = 'WPL' THEN 'WPL - Wait Passenger Load'
+      ELSE Expr3
+      END;
+
+/* Step 11: Create new fields in Consolidated_Performance_Incident_Fina for a range of items
+    1) Add new columnes for new fields
+    2) insert values in to new columns using calculations */
+    
+ALTER TABLE RIM.Consolidated_Performance_Incident_Final
+  ADD COLUMN Planned_Cancellation decimal(4,2);
+ALTER TABLE RIM.Consolidated_Performance_Incident_Final
+  ADD COLUMN Planned_Short_Arrival decimal(4,2);
+ALTER TABLE RIM.Consolidated_Performance_Incident_Final
+  ADD COLUMN Unplanned_Cancellation decimal(4,2);
+ALTER TABLE RIM.Consolidated_Performance_Incident_Final
+  ADD COLUMN Unplanned_Short_Arrival decimal(4,2);
+ALTER TABLE RIM.Consolidated_Performance_Incident_Final
+  ADD COLUMN Unplanned_Short_Departure decimal(4,2);
+ALTER TABLE RIM.Consolidated_Performance_Incident_Final
+  ADD COLUMN Unplanned_Loop_Bypass decimal(4,2);
+ALTER TABLE RIM.Consolidated_Performance_Incident_Final
+  ADD COLUMN Unplanned_Westona_Bypass decimal(4,2);
+ALTER TABLE RIM.Consolidated_Performance_Incident_Final
+  ADD COLUMN Unplanned_Early_Arrival decimal(4,2);
+ALTER TABLE RIM.Consolidated_Performance_Incident_Final
+  ADD COLUMN Unplanned_Late_Arrival decimal(4,2);
+ALTER TABLE RIM.Consolidated_Performance_Incident_Final
+  ADD COLUMN Timetabled_Services decimal(4,2);
+ALTER TABLE RIM.Consolidated_Performance_Incident_Final
+  ADD COLUMN Total_Unplanned_Cancellation decimal(4,2);
+  
+UPDATE RIM.Consolidated_Performance_Incident_Final
+  SET Planned_Cancellation =
+    CASE 
+      WHEN PAmex LIKE '%C%' THEN KPI_Factor
+      ELSE 0
+      END;
+UPDATE RIM.Consolidated_Performance_Incident_Final
+  SET Planned_Short_Arrival =
+    CASE
+      WHEN PAmex LIKE '%SA%' THEN KPI_Factor
+      ELSE 0
+      END;
+UPDATE RIM.Consolidated_Performance_Incident_Final
+  SET Unplanned_Cancellation =
+    CASE
+      WHEN AAmex LIKE '%C%' THEN KPI_Factor
+      ELSE 0
+      END;
+UPDATE RIM.Consolidated_Performance_Incident_Final
+  SET Unplanned_Short_Arrival =
+    CASE
+      WHEN AAmex LIKE '%SA%' THEN KPI_Factor
+      ELSE 0
+      END;
+UPDATE RIM.Consolidated_Performance_Incident_Final
+  SET Unplanned_Short_Departure =
+    CASE
+      WHEN AAmex LIKE '%SD%' THEN KPI_Factor
+      ELSE 0
+      END;
+      
+/*
+UPDATE RIM.Consolidated_Performance_Incident_Final
+  SET Unplanned_Loop_Bypass =
+    CASE
+      WHEN AAmex LIKE '%BL%' THEN KPI_Factor
+      ELSE 0
+      END;
+UPDATE RIM.Consolidated_Performance_Incident_Final
+  SET Unplanned_Westona_Bypass =
+    CASE
+      WHEN AAmex LIKE '%BW%' THEN KPI_Factor
+      ELSE 0
+      END;
+*/
+
+UPDATE RIM.Consolidated_Performance_Incident_Final
+  SET Unplanned_Loop_Bypass =
+    CASE
+      WHEN (AAmex LIKE '%BL%' AND AAmex NOT LIKE '%S%') THEN KPI_Factor
+      ELSE 0
+      END;
+UPDATE RIM.Consolidated_Performance_Incident_Final
+  SET Unplanned_Westona_Bypass =
+    CASE
+      WHEN (AAmex LIKE '%BW%' AND AAmex NOT LIKE '%S%') THEN KPI_Factor
+      ELSE 0
+      END;
+
+UPDATE RIM.Consolidated_Performance_Incident_Final
+  SET Unplanned_Early_Arrival =
+    CASE
+      WHEN (On_Time = 0 AND Arr_Mins_Early < 0) THEN KPI_Factor
+      ELSE 0
+      END;
+UPDATE RIM.Consolidated_Performance_Incident_Final
+  SET Unplanned_Late_Arrival =
+    CASE
+      WHEN On_Time = 0 THEN KPI_Factor
+      ELSE 0
+      END;
+UPDATE RIM.Consolidated_Performance_Incident_Final
+  SET Timetabled_Services = KPI_Factor;
+UPDATE RIM.Consolidated_Performance_Incident_Final
+  SET Total_Unplanned_Cancellation = (Unplanned_Cancellation + (Unplanned_Short_Arrival * 0.25) + (Unplanned_Short_Departure * 0.25) + (Unplanned_Loop_Bypass * 0.125) + (Unplanned_Westona_Bypass * 0.125));
+
+UPDATE RIM.Consolidated_Performance_Incident_Final
+SET Expr3 =
+  CASE
+    WHEN Expr3 LIKE '%Trap%' THEN 'XTrap'
+    ELSE Expr3
+    END;
+
+INSERT INTO RIM.Reliability_Impact_Model (date,tdn,line_tdn,line_incident,pamex,time_band_code,direction,arr_mins_late,arr_mins_early,dep_mins_late,dep_mins_early,pwm,a_bypass_city_loop,p_bypass_city_loop,a_bypass_westona_loop,p_bypass_westona_loop,
+aamex,incident_number,incident_from,incident_to,location,asset_id,expr1,expr2,expr3,expr4,expr5,expr6,expr7,reported_fault,action_taken,kpi_factor,planned_cancellation,planned_short_arrival,unplanned_cancellation,unplanned_short_arrival,unplanned_short_departure,
+unplanned_loop_bypass,unplanned_westona_bypass,unplanned_early_arrival,unplanned_late_arrival,timetabled_services,total_unplanned_cancellation)
+SELECT actualdate,actualtdn,plineid,line,pamex,time_band_code,direction,arr_mins_late,arr_mins_early,dep_mins_late,dep_mins_early,pwm,a_bypass_city_loop,p_bypass_city_loop,a_bypass_westona_loop,p_bypass_westona_loop,aamex,incident_number,incident_from,incident_to,location,
+asset_id,expr1,expr2,expr3,expr4,expr5,expr6,expr7,reported_fault,action_taken,kpi_factor,planned_cancellation,planned_short_arrival,unplanned_cancellation,unplanned_short_arrival,unplanned_short_departure,unplanned_loop_bypass,
+unplanned_westona_bypass,unplanned_early_arrival,unplanned_late_arrival,timetabled_services,total_unplanned_cancellation
+FROM RIM.Consolidated_Performance_Incident_Final;
+
+UPDATE RIM.Reliability_Impact_Model SET Incident_From = RIM.PRS_Incidents.Location_From
+FROM RIM.PRS_Incidents
+WHERE RIM.Reliability_Impact_Model.Incident_Number = RIM.PRS_Incidents.Incident_No;
+
+UPDATE RIM.Reliability_Impact_Model SET Incident_To = RIM.PRS_Incidents.Location_To
+FROM RIM.PRS_Incidents
+WHERE RIM.Reliability_Impact_Model.Incident_Number = RIM.PRS_Incidents.Incident_No;
+
+UPDATE RIM.Reliability_Impact_Model
+SET Expr4 = RIM.Recategorised.Recategorised
+FROM RIM.Recategorised
+WHERE RIM.Reliability_Impact_Model.Incident_Number = RIM.Recategorised.Incident_No
+  AND Expr1 = 'Operational';
+
+UPDATE RIM.Reliability_Impact_Model
+SET Incident_From = RIM.Station_Coding.Name
+FROM RIM.Station_Coding
+WHERE RIM.Reliability_Impact_Model.Incident_From = RIM.Station_Coding.Acronym;
+
+UPDATE RIM.Reliability_Impact_Model
+SET Incident_To = RIM.Station_Coding.Name
+FROM RIM.Station_Coding
+WHERE RIM.Reliability_Impact_Model.Incident_To = RIM.Station_Coding.Acronym;
+
+/* Coding to rename/allocate Expr4 accurately for Expr2 = Operational incidents. Renaming of 'Other' categories must occur FIRST before the creation of new Expr3 fields */
+UPDATE RIM.Reliability_Impact_Model
+SET Expr2 = 
+  CASE
+    WHEN Expr2 = 'VAN - Vandals' THEN 'EXT - External Factors'
+    WHEN Expr2 = 'MET - Metro Trains' THEN 'OPS - Operations'
+    ELSE Expr2
+  END;
+    
+UPDATE RIM.Reliability_Impact_Model
+SET Expr4 = 
+  CASE
+    WHEN (Expr4 = 'Other' AND Expr2 = 'PSI - Passenger Impact') THEN 'Others - Passenger Related (Vomit etc)'
+    /* Classification of 'Others' for EXT has not been completed */
+    WHEN (Expr4 = 'Other' AND Expr2 = 'VLP - V/Line Passenger') THEN 'V/Line (Others)'
+    WHEN (Expr4 = 'Other' AND Expr3 = 'WHR - Weather') THEN 'Others - Weather'
+    WHEN (Expr4 = 'Other' AND Expr3 = 'LXI - Level crossing Incident') THEN 'Trespasser'
+    ELSE Expr4
+  END;
+    
+UPDATE RIM.Reliability_Impact_Model
+SET Expr5 = Expr2 WHERE Expr3 = 'FGT - Freight Train';
+
+UPDATE RIM.Reliability_Impact_Model
+SET Expr3 =
+  CASE
+    WHEN Expr4 = 'Wait Pass Loading' THEN 'Wait Passenger Loading'
+    WHEN Expr4 = 'Ill Pass' THEN 'Pass Behaviour (ill pass, unruly, pass related)'
+    WHEN Expr4 = 'Unruly Pass' THEN 'Pass Behaviour (ill pass, unruly, pass related)'
+    WHEN Expr4 = 'Wheelchair Traffic' THEN 'Pass Behaviour (ill pass, unruly, pass related)'
+    WHEN Expr4 = 'Event Traffic' THEN 'Pass Behaviour (ill pass, unruly, pass related)'
+    WHEN Expr4 = 'Others - Passenger Related (Vomit etc)' THEN 'Pass Behaviour (ill pass, unruly, pass related)'
+    WHEN Expr4 = 'Staff Error' THEN 'Operations'
+    WHEN Expr4 = 'Metro' THEN 'Operations'
+    WHEN Expr4 = 'Train Driver Related' THEN 'Operations'
+    WHEN Expr4 = 'Storm' THEN 'Inclement Weather'
+    WHEN Expr4 = 'Rain' THEN 'Inclement Weather'
+    WHEN (Expr4 = 'Others - Weather' AND Expr3 = 'WHR - Weather') THEN 'Inclement Weather'
+    WHEN Expr4 = 'Graffiti' THEN 'Extl Factors (graffiti, vandalism, police ops, trespasser)'
+    WHEN Expr4 = 'Vandalism' THEN 'Extl Factors (graffiti, vandalism, police ops, trespasser)'
+    WHEN Expr4 = 'Police ops' THEN 'Extl Factors (graffiti, vandalism, police ops, trespasser)'
+    WHEN Expr4 = 'Trespasser' THEN 'Extl Factors (graffiti, vandalism, police ops, trespasser)'
+    WHEN (Expr3 = 'FGT - Freight Train' AND Expr1 = 'Operational') THEN 'Extl Factors (graffiti, vandalism, police ops, trespasser)'
+    WHEN ((Expr3 = 'ELL' OR Expr3 = 'ELE') AND Expr1 = 'Operational') THEN 'Extl Factors (graffiti, vandalism, police ops, trespasser)'
+    WHEN (Expr3 = 'PAS - Passenger Train' AND Expr1 = 'Operational' AND Expr2 != 'VLP - V/Line Passenger') THEN 'Extl Factors (graffiti, vandalism, police ops, trespasser)'
+    WHEN (Expr3 = 'LXI - Level crossing Incident' AND Expr1 = 'Operational') THEN 'Extl Factors (graffiti, vandalism, police ops, trespasser)'
+    WHEN (Expr3 = 'MIS' AND Expr1 = 'Operational') THEN 'Extl Factors (graffiti, vandalism, police ops, trespasser)'
+    WHEN Expr4 = 'Late Departure / Presentation' THEN 'VLP'
+    WHEN Expr4 = 'Wait Passengers / Interchange / Congestion' THEN 'VLP'
+    WHEN Expr4 = 'V/Line (Others)' THEN 'VLP'
+    WHEN (Expr4 = 'Other' AND Expr3 = 'MIS') THEN 'Extl Factors (graffiti, vandalism, police ops, trespasser)'
+    WHEN (Expr4 = 'Other' AND Expr3 = 'MISC') THEN 'Extl Factors (graffiti, vandalism, police ops, trespasser)'
+    WHEN (Expr4 = 'Other' AND Expr3 = 'OTH - Others') THEN 'Extl Factors (graffiti, vandalism, police ops, trespasser)'
+    WHEN (Expr4 = 'Other' AND Expr3 = 'TCF - Track Circuit Failure') THEN 'Extl Factors (graffiti, vandalism, police ops, trespasser)'
+    ELSE Expr3
+  END;
+
+DROP TABLE IF EXISTS RIM.FMP;
+DROP TABLE IF EXISTS RIM.INF_PWM_Report;
+DROP TABLE IF EXISTS RIM.Performance_Data_Report;
+DROP TABLE IF EXISTS RIM.PRS_Incidents;
+DROP TABLE IF EXISTS RIM.Signalling_Data;
+DROP TABLE IF EXISTS RIM.INF_PWM_Report_Stg1;
+DROP TABLE IF EXISTS RIM.INF_PWM_Report_Stg2_Signal;
+DROP TABLE IF EXISTS RIM.INF_PWM_Report_Stg2_Track;
+DROP TABLE IF EXISTS RIM.INF_PWM_Report_Stg2_Power;
+DROP TABLE IF EXISTS RIM.Consolidated_Incident_Cause;
+DROP TABLE IF EXISTS RIM.PRS_Incidents_Stg1;
+DROP TABLE IF EXISTS RIM.PRS_Incidents_Stg2;
+DROP TABLE IF EXISTS RIM.PRS_Incidents_Stg3_NotAsset;
+DROP TABLE IF EXISTS RIM.Consolidated_Incident_Cause_Final;
+DROP TABLE IF EXISTS RIM.Performance_Data_Report_UID;
+DROP TABLE IF EXISTS RIM.Consolidated_Performance_Incident;
+DROP TABLE IF EXISTS RIM.Temp;
+DROP TABLE IF EXISTS RIM.Temp2;
+DROP TABLE IF EXISTS RIM.PRS_Incidents_Unique;
+DROP TABLE IF EXISTS RIM.Consolidated_Performance_Incident_Final;
+DROP TABLE IF EXISTS RIM.Recategorised;
+DROP TABLE IF EXISTS RIM.Station_Coding;
+
+
+/* END ______________________________ */
+
